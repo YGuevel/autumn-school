@@ -1,0 +1,23 @@
+@pytest.mark.parametrize("M,L,CT", [(100000,10,'petrol-car'),
+                                    (100000,30,'petrol-car'),
+                                    (240000,17,'bioethanol-car'),
+                                    (300000,20,'electric-car'),
+                                    (300000,10,'electric-car')])
+def test_my_function(M,L,CT):
+    my_function(M,L)
+    bd.Method(("GWP","example")).write([
+        (("example","CO2"),1),
+    ])
+    lca = bc.LCA({('example', CT): 1}, ("GWP", "example"))
+    lca.lci()
+    lca.lcia()
+    tlca = TemporalisLCA(lca)
+    tl = tlca.build_timeline()
+    df = tl.build_dataframe()
+    df["amount_sum"] = df['amount'].cumsum()
+    
+    for key,value in df.iterrows():
+        if value.loc['amount_sum']>40000:
+            display(value.loc['date'])
+            print("toto")
+        assert value.loc['amount_sum'] < 40000
